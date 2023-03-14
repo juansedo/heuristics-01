@@ -1,5 +1,6 @@
 import numpy as np
 import time
+from utils import Excel
 import random
 
 def getDistance(n1, n2):
@@ -7,26 +8,7 @@ def getDistance(n1, n2):
   x2, y2 = n2
   return np.sqrt((x2-x1)**2 + (y2-y1)**2)
 
-def run(workbook, n, R, Q, Th, alpha, data):
-  path, distances, total_time = execute(n, R, Q, Th, alpha, data)
-
-  print('-----------------')
-  sheet1 = workbook.add_sheet('GRASP')
-  for i in range(0, R):
-    size = len(path[i])
-    for j in range(size):
-      sheet1.write(i + 1, j, path[i][j])
-      print(path[i][j], end=' ')
-    sheet1.write(i + 1, size, distances[i])
-    sheet1.write(i + 1, size + 1, 1 if distances[i] > Th else 0)
-    print(f'({distances[i]}, {1 if distances[i] > Th else 0})')
-  sheet1.write(R + 1, 1, sum(distances))
-  sheet1.write(R + 1, 2, total_time)
-  sheet1.write(R + 1, 3, 1)
-  print(f'[{sum(distances)}, {total_time}, {1}]')
-  print('-----------------')
-
-def execute(n, R, Q, Th, alpha, data):
+def run(n, R, Q, Th, alpha, data):
   start = time.time()
 
   # Initialize data
@@ -96,4 +78,7 @@ def execute(n, R, Q, Th, alpha, data):
 
   end = time.time()
   total_time = (end - start) * 1000
-  return [list(map(lambda x: x.path, trucks)), list(map(lambda x: x.total_traveled, trucks)), total_time]
+  paths = list(map(lambda x: x.path, trucks))
+  dist = list(map(lambda x: x.total_traveled, trucks))
+  Excel.add_sheet('GRASP', paths, dist, total_time, Th)
+  return [paths, dist, total_time]

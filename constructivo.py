@@ -1,4 +1,5 @@
 import numpy as np
+from utils import Excel
 import time
 
 def getDistance(n1, n2):
@@ -20,26 +21,7 @@ def getShortestPath(distances, demands, available):
 # Q - vehicle capacity
 # Th - maximum distance to travel
 # data - "list of lists" with input data (index, x, y, demand)
-def run(workbook, n, R, Q, Th, data):
-  path, distances, total_time = execute(n, R, Q, Th, data)
-
-  print('-----------------')
-  sheet1 = workbook.add_sheet('CONSTRUCTIVO')
-  for i in range(0, R):
-    size = len(path[i])
-    for j in range(size):
-      sheet1.write(i + 1, j, path[i][j])
-      print(path[i][j], end=' ')
-    sheet1.write(i + 1, size, distances[i])
-    sheet1.write(i + 1, size + 1, 1 if distances[i] > Th else 0)
-    print(f'({distances[i]}, {1 if distances[i] > Th else 0})')
-  sheet1.write(R + 1, 1, sum(distances))
-  sheet1.write(R + 1, 2, total_time)
-  sheet1.write(R + 1, 3, 1)
-  print(f'[{sum(distances)}, {total_time}, {1}]')
-  print('-----------------')
-
-def execute(n, R, Q, Th, data):
+def run(n, R, Q, Th, data):
   start = time.time()
 
   # Initialize data
@@ -90,4 +72,5 @@ def execute(n, R, Q, Th, data):
 
   end = time.time()
   total_time = (end - start) * 1000
+  Excel.add_sheet('CONSTRUCTIVO', path, distances, total_time, Th)
   return [path, total_distances, total_time]

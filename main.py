@@ -1,8 +1,8 @@
 #%%
-from xlwt import Workbook
 from matplotlib.axes import Axes
 import os
 from dotenv import load_dotenv
+from utils import Excel
 
 import constructivo as Constructivo
 import grasp as GRASP
@@ -10,7 +10,6 @@ import grasp as GRASP
 
 load_dotenv()
 
-OUTPUTS_PATH = os.getenv('OUTPUTS_PATH', './outputs')
 DATA_PATH = os.getenv('DATA_PATH', './data')
 
 def readTestFile(id):
@@ -19,9 +18,6 @@ def readTestFile(id):
     lines = [line.split() for line in lines]
     lines = [[int(x) for x in line] for line in lines]
   return lines
-
-wb = Workbook()
-
 
 nsol=100
 alpha=0.5
@@ -33,7 +29,9 @@ for id in range(1,2):
   n, R, Q, Th = data[0]
   data = data[1:]
 
-  #Constructivo.run(wb, n, R, Q, Th, data)
-  GRASP.run(wb, n, R, Q, Th, alpha, data)
+  Excel.start()
 
-  wb.save(OUTPUTS_PATH + 'result.xls')
+  #Constructivo.run(n, R, Q, Th, data)
+  GRASP.run(n, R, Q, Th, alpha, data)
+
+  Excel.save()
