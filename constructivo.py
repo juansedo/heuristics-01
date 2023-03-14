@@ -13,16 +13,35 @@ def getShortestPath(distances, demands, available):
     if distance < value and (0 < demands[n] and demands[n] <= available):
       value = distance
       next_node = n
-
   return [next_node, value]
-
 
 # n - number of demand nodes
 # R - vehicle amount
 # Q - vehicle capacity
 # Th - maximum distance to travel
 # data - "list of lists" with input data (index, x, y, demand)
-def run(n, R, Q, Th, data):
+def run(workbook, n, R, Q, Th, data):
+  path, distances, total_time = execute(n, R, Q, Th, data)
+
+  print('-----------------')
+  sheet1 = workbook.add_sheet('CONSTRUCTIVO')
+  for i in range(0, R):
+    size = len(path[i])
+    for j in range(size):
+      sheet1.write(i + 1, j, path[i][j])
+      print(path[i][j], end=' ')
+    sheet1.write(i + 1, size, distances[i])
+    sheet1.write(i + 1, size + 1, 1 if distances[i] > Th else 0)
+    print(f'({distances[i]}, {1 if distances[i] > Th else 0})')
+  sheet1.write(R + 1, 1, sum(distances))
+  sheet1.write(R + 1, 2, total_time)
+  sheet1.write(R + 1, 3, 1)
+  print(f'[{sum(distances)}, {total_time}, {1}]')
+  print('-----------------')
+
+def execute(n, R, Q, Th, data):
+  start = time.time()
+
   # Initialize data
   distances = np.zeros((n + 1, n + 1))
   demands = np.zeros(n + 1)
@@ -41,23 +60,14 @@ def run(n, R, Q, Th, data):
   total_distances = np.zeros(R)
   actual_truck = 0
 
-  start = time.time()
-
   while sum(demands) > 0:
     actual_node = path[actual_truck][-1]
     available = availables[actual_truck]
     return_home = distances[actual_node][0]
 
-    if available == 0:
-      t[actual_truck] = 0
-      total_distances[actual_truck] = total_distances[actual_truck] + return_home
-      availables[actual_truck] = Q
-      path[actual_truck].append(0)
-      continue
-
     next_node, distance = getShortestPath(distances[actual_node], demands, available)
 
-    if t[actual_truck] + distance + return_home > Th:
+    if available == 0 or t[actual_truck] + distance + return_home > Th:
       t[actual_truck] = 0
       total_distances[actual_truck] = total_distances[actual_truck] + return_home
       availables[actual_truck] = Q
