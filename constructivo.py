@@ -43,34 +43,46 @@ def run(n, R, Q, Th, data):
   actual_truck = 0
 
   while sum(demands) > 0:
+    valid = []
+    for i in range(R):
+      actual_node = path[i][-1]
+      next_node, distance = getShortestPath(distances[actual_node], demands, availables[i])
+      if next_node == 0:
+        t[i] = 0
+        total_distances[i] += return_home
+        availables[i] = Q
+        path[i].append(0)
+        #next_node, distance = getShortestPath(distances[actual_node], demands, availables[i])
+      valid.append([i, next_node, distance])
+
+    actual_truck, next_node, distance = min(valid, key=lambda x: x[2])
+
     actual_node = path[actual_truck][-1]
     available = availables[actual_truck]
     return_home = distances[actual_node][0]
 
-    next_node, distance = getShortestPath(distances[actual_node], demands, available)
+    #next_node, distance = getShortestPath(distances[actual_node], demands, available)
 
     if available == 0 or t[actual_truck] + distance + return_home > Th:
       t[actual_truck] = 0
-      total_distances[actual_truck] = total_distances[actual_truck] + return_home
+      total_distances[actual_truck] += return_home
       availables[actual_truck] = Q
       path[actual_truck].append(0)
       continue
 
-    t[actual_truck] = t[actual_truck] + distance
-    total_distances[actual_truck] = total_distances[actual_truck] + distance
+    t[actual_truck] += distance
+    total_distances[actual_truck] += distance
     availables[actual_truck] = available - demands[next_node]
     demands[next_node] = 0
     path[actual_truck].append(next_node)
 
-    actual_truck = (actual_truck + 1) % R
-
   for actual_truck in range(R):
     actual_node = path[actual_truck][-1]
     return_home = distances[actual_node][0] if actual_node != 0 else 0
-    total_distances[actual_truck] = total_distances[actual_truck] + return_home
+    total_distances[actual_truck] += return_home
     path[actual_truck].append(0)
 
   end = time.time()
   total_time = (end - start) * 1000
-  Excel.add_sheet('CONSTRUCTIVO', path, distances, total_time, Th)
+  Excel.add_sheet('CONSTRUCTIVO', path, total_distances, total_time, Th)
   return [path, total_distances, total_time]

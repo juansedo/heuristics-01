@@ -31,7 +31,7 @@ for id in range(1,2):
 
   Excel.start()
 
-  #Constructivo.run(n, R, Q, Th, data)
-  GRASP.run(n, R, Q, Th, alpha, data)
+  Constructivo.run(n, R, Q, Th, data)
+  #GRASP.run(n, R, Q, Th, alpha, data)
 
   Excel.save()
