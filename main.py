@@ -1,5 +1,4 @@
 #%%
-from matplotlib.axes import Axes
 import os
 from dotenv import load_dotenv
 from utils import Excel
@@ -25,7 +24,7 @@ K=5
 r=5
 
 for id in range(1,2):
-  data = readTestFile(0)
+  data = readTestFile(1)
   n, R, Q, Th = data[0]
   data = data[1:]
 
@@ -35,3 +34,4 @@ for id in range(1,2):
   #GRASP.run(n, R, Q, Th, alpha, data)
 
   Excel.save()
+# %%
