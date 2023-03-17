@@ -24,7 +24,7 @@ K=5
 r=5
 
 for id in range(1,2):
-  data = readTestFile(1)
+  data = readTestFile(6)
   n, R, Q, Th = data[0]
   data = data[1:]
 

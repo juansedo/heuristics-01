@@ -1,4 +1,5 @@
 from xlwt import Workbook
+import matplotlib.pyplot as plt
 import os
 from dotenv import load_dotenv
 
@@ -33,3 +34,26 @@ class Excel:
   def save():
     print('saved!')
     Excel.wb.save(OUTPUTS_PATH + 'result.xls')
+
+class Plot:
+  def plot(data, paths):
+    fig, ax = plt.subplots()
+    x = []
+    y = []
+
+    for node in data:
+      x.append(node[1])
+      y.append(node[2])
+
+    ax.plot(x, y, 'o', label='Nodos')
+
+    # Plot paths
+    for p in paths:
+      x = []
+      y = []
+      for node in paths[p]:
+        x.append(data[node][1])
+        y.append(data[node][2])
+      ax.plot(x, y, '-', label=f'Camión {p+1}')
+
+    plt.show()
