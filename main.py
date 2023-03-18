@@ -1,37 +1,55 @@
 #%%
-import os
-from dotenv import load_dotenv
-from utils import Excel
+from utils import Excel, TestFile, Plot
 
 import constructivo as Constructivo
 import grasp as GRASP
 # import ruido
 
-load_dotenv()
+def runConstructivo():
+  paths, distances, time = Constructivo.run(n, R, Q, Th, data)
+  Excel.add_sheet('CONSTRUCTIVO', paths, distances, time, Th, verbose = False)
 
-DATA_PATH = os.getenv('DATA_PATH', './data')
+  print(f'-----------------')
+  print(f'CONSTRUCTIVO Summary')
+  print(f'Iterations: 1, Time: {time:.2f} ms')
+  print(f'Distance: {sum(distances)}')
+  print(f'-----------------')
 
-def readTestFile(id):
-  with open(f'{DATA_PATH}mtVRP{id}.txt') as f:
-    lines = [line.rstrip() for line in f]
-    lines = [line.split() for line in lines]
-    lines = [[int(x) for x in line] for line in lines]
-  return lines
+def runGRASP():
+  x = []
+  y = []
+  times = []
+  for i in range(iterations):
+    paths, distances, time = GRASP.run(n, R, Q, Th, alpha, data)
+    y.append(f'{i + 1} ({time:.2f} ms)')
+    x.append(sum(distances))
+    times.append(time)
+    Excel.add_sheet('GRASP', paths, distances, time, Th, offset = i * (R + 2), verbose = False)
 
+  Plot.plotDistances(y, x)
+
+  print(f'-----------------')
+  print(f'GRASP Summary')
+  print(f'Iterations: {iterations}, alpha: {alpha}, Avg. time: {sum(times)/len(times):.2f} ms')
+  print(f'Lowest distance: {min(x)}, Highest distance: {max(x)}, Avg. distance: {sum(x)/len(x):.2f}')
+  print(f'-----------------')
+
+def runRuido():
+  pass
+
+alpha=0.2
+iterations = 10
 nsol=100
-alpha=0.5
-K=5
-r=5
 
-for id in range(1,2):
-  data = readTestFile(6)
-  n, R, Q, Th = data[0]
-  data = data[1:]
+data = TestFile.getById(12)
+n, R, Q, Th = data[0]
+data = data[1:]
 
-  Excel.start()
+Excel.start()
 
-  Constructivo.run(n, R, Q, Th, data)
-  #GRASP.run(n, R, Q, Th, alpha, data)
+runConstructivo()
+runGRASP()
+runRuido()
 
-  Excel.save()
+Excel.save()
 # %%

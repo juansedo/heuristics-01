@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from utils import Excel
+from utils import Plot
 import random
 
 def getDistance(n1, n2):
@@ -20,65 +20,50 @@ def run(n, R, Q, Th, alpha, data):
     demands[node[0]] = node[3]
 
   # Initialize variables
-  path = {}
+  paths = {}
   for i in range(R):
-    path[i] = [0]
+    paths[i] = [0]
 
-  class Truck:
-    max_capacity = Q
+  availables = np.full(R, Q)
+  total_distances = np.zeros(R)
 
-    def __init__(self, id):
-      self.id = id
-      self.path = [0]
-      self.total_traveled = 0
-      self.last_traveled = 0
-      self.available_capacity = Truck.max_capacity
-
-    def goTo(self, next_node):
-      actual_node = self.path[-1]
-      self.path.append(next_node)
-      self.total_traveled += distances[actual_node][next_node]
-      self.last_traveled += distances[actual_node][next_node]
-      self.available_capacity -= demands[next_node]
-
-    def returnHome(self):
-      actual_node = self.path[-1]
-      self.path.append(0)
-      self.total_traveled += distances[actual_node][0]
-      self.last_traveled = 0
-      self.available_capacity = Truck.max_capacity
-
-  trucks = [Truck(i) for i in range(R)]
   i = 0
 
   while sum(demands) > 0:
-    actual_node = trucks[i].path[-1]
+    actual_node = paths[i][-1]
     candidates = {}
     for j in range(n+1):
-      if 0 < demands[j] and demands[j] <= trucks[i].available_capacity:
+      if 0 < demands[j] and demands[j] <= availables[i]:
         candidates[j] = distances[actual_node][j]
 
     if len(candidates) == 0:
-      trucks[i].returnHome()
+      total_distances[i] += distances[actual_node][0]
+      availables[i] = Q
+      paths[i].append(0)
       continue
 
     c_min = min(candidates.values())
     c_max = max(candidates.values())
 
-    rcl = list(filter(lambda x: distances[actual_node][x] <= c_min + alpha * (c_max - c_min), candidates))
-    c = random.choice(rcl)
+    upper_bound = c_min + alpha * (c_max - c_min)
+    rcl = list(filter(lambda x: distances[actual_node][x] <= upper_bound, candidates))
+    next_node = random.choice(rcl)
 
-    trucks[i].goTo(c)
-    demands[c] = 0
+    total_distances[i] += distances[actual_node][next_node]
+    availables[i] -= demands[next_node]
+    demands[next_node] = 0
+    paths[i].append(next_node)
 
     i = (i + 1) % R
 
-  for k in range(R):
-    trucks[k].returnHome()
+  for actual_truck in range(R):
+    actual_node = paths[actual_truck][-1]
+    if actual_node != 0:
+      total_distances += distances[actual_node][0] # return to depot
+      paths[actual_truck].append(0)
 
   end = time.time()
   total_time = (end - start) * 1000
-  paths = list(map(lambda x: x.path, trucks))
-  dist = list(map(lambda x: x.total_traveled, trucks))
-  Excel.add_sheet('GRASP', paths, dist, total_time, Th)
-  return [paths, dist, total_time]
+
+  Plot.plot(data, paths)
+  return [paths, total_distances, total_time]

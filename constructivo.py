@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import time
-from utils import Excel, Plot
+from utils import Plot
 
 def getDistance(n1, n2):
   x1, y1 = n1
@@ -34,9 +33,9 @@ def run(n, R, Q, Th, data):
     demands[node[0]] = node[3]
 
   # Initialize variables
-  path = {}
+  paths = {}
   for i in range(R):
-    path[i] = [0]
+    paths[i] = [0]
 
   availables = np.full(R, Q)
   total_distances = np.zeros(R)
@@ -45,7 +44,7 @@ def run(n, R, Q, Th, data):
   while sum(demands) > 0:
     valid = []
     for i in range(R):
-      actual_node = path[i][-1]
+      actual_node = paths[i][-1]
       next_node, distance = getShortestPath(distances[actual_node], demands, availables[i])
       if next_node != 0:
         valid.append([i, next_node, distance])
@@ -54,7 +53,7 @@ def run(n, R, Q, Th, data):
       if actual_node != 0: # and next_node == 0
         total_distances[i] += distances[actual_node][0] # return to depot
         availables[i] = Q
-        path[i].append(0)
+        paths[i].append(0)
 
     # Every truck without available capacity
     if len(valid) == 0:
@@ -63,22 +62,21 @@ def run(n, R, Q, Th, data):
       continue
 
     actual_truck, next_node, distance = min(valid, key=lambda x: x[2])
-    actual_node = path[actual_truck][-1]
+    actual_node = paths[actual_truck][-1]
 
     total_distances[actual_truck] += distance
     availables[actual_truck] -= demands[next_node]
     demands[next_node] = 0
-    path[actual_truck].append(next_node)
+    paths[actual_truck].append(next_node)
 
   for actual_truck in range(R):
-    actual_node = path[actual_truck][-1]
+    actual_node = paths[actual_truck][-1]
     if actual_node != 0:
       total_distances += distances[actual_node][0] # return to depot
-      path[actual_truck].append(0)
+      paths[actual_truck].append(0)
 
   end = time.time()
   total_time = (end - start) * 1000
 
-  Plot.plot(data, path)
-  Excel.add_sheet('CONSTRUCTIVO', path, total_distances, total_time, Th)
-  return [path, total_distances, total_time]
+  Plot.plot(data, paths)
+  return [paths, total_distances, total_time]
