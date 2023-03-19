@@ -65,5 +65,5 @@ def run(n, R, Q, Th, alpha, data):
   end = time.time()
   total_time = (end - start) * 1000
 
-  Plot.plot(data, paths)
+  #Plot.plot(data, paths)
   return [paths, total_distances, total_time]

@@ -3,7 +3,7 @@ from utils import Excel, TestFile, Plot
 
 import constructivo as Constructivo
 import grasp as GRASP
-# import ruido
+import ruido as Ruido
 
 def runConstructivo():
   paths, distances, time = Constructivo.run(n, R, Q, Th, data)
@@ -35,19 +35,35 @@ def runGRASP():
   print(f'-----------------')
 
 def runRuido():
-  pass
+  x = []
+  y = []
+  times = []
+  for i in range(iterations):
+    paths, distances, time = Ruido.run(n, R, Q, Th, data)
+    y.append(f'{i + 1} ({time:.2f} ms)')
+    x.append(sum(distances))
+    times.append(time)
+    Excel.add_sheet('Ruido', paths, distances, time, Th, offset = i * (R + 2), verbose = False)
+
+  Plot.plotDistances(y, x)
+
+  print(f'-----------------')
+  print(f'Ruido Summary')
+  print(f'Iterations: {iterations}, Avg. time: {sum(times)/len(times):.2f} ms')
+  print(f'Lowest distance: {min(x)}, Highest distance: {max(x)}, Avg. distance: {sum(x)/len(x):.2f}')
+  print(f'-----------------')
 
 alpha=0.2
 iterations = 10
 nsol=100
 
-data = TestFile.getById(12)
+data = TestFile.getById(0)
 n, R, Q, Th = data[0]
 data = data[1:]
 
 Excel.start()
 
-runConstructivo()
+#runConstructivo()
 runGRASP()
 runRuido()
 
