@@ -17,57 +17,38 @@ class TestFile:
       lines = [[int(x) for x in line] for line in lines]
     return lines
 
-class Excel:
-  wb = None
+class ExcelBook:
+  def __init__(self, title):
+    self.title = title
+    self.wb = Workbook()
 
-  def start():
-    Excel.wb = Workbook()
-
-  def get_sheet_by_name(name):
+  def get_sheet_by_name(self, name):
     try:
       for idx in itertools.count():
-        sheet = Excel.wb.get_sheet(idx)
+        sheet = self.wb.get_sheet(idx)
         if sheet.name == name:
           return sheet
     except IndexError:
-      return Excel.wb.add_sheet(name)
+      return self.wb.add_sheet(name)
 
-  def add_sheet(title, paths, distances, total_time, Th, offset = 0, verbose = True):
-    if verbose: print('-----------------' + title)
-    sheet1 = Excel.get_sheet_by_name(title)
+  def add_sheet(self, title, paths, distances, total_time, Th, offset = 0, verbose = True):
+    sheet1 = self.get_sheet_by_name(title)
     R = len(paths)
     for i in range(0, R):
       size = len(paths[i])
       row = offset + i + 1
       for j in range(size):
         sheet1.write(row, j, paths[i][j])
-        if verbose: print(paths[i][j], end=' ')
       sheet1.write(row, size, distances[i])
       sheet1.write(row, size + 1, 1 if distances[i] > Th else 0)
-      if verbose: print(f'({distances[i]}, {1 if distances[i] > Th else 0})')
 
     sheet1.write(offset + R + 1, 1, sum(distances))
     sheet1.write(offset + R + 1, 2, total_time)
     sheet1.write(offset + R + 1, 3, 1)
-    if verbose:
-      print(f'[{sum(distances)}, {total_time}, {1}]')
-      print('-----------------')
 
-  def mocked_add_sheet(title, paths, distances, total_time, Th):
-    print('-----------------' + title)
-    R = len(paths)
-    for i in range(0, R):
-      size = len(paths[i])
-      for j in range(size):
-        print(paths[i][j], end=' ')
-      print(f'({distances[i]}, {1 if distances[i] > Th else 0})')
-
-    print(f'[{sum(distances)}, {total_time}, {1}]')
-    print('-----------------')
-
-  def save():
-    print('saved!')
-    Excel.wb.save(OUTPUTS_PATH + 'result.xls')
+  def save(self):
+    print(f'{self.title} saved!')
+    self.wb.save(OUTPUTS_PATH + self.title)
 
 class Plot:
   def plotDistances(labels, distances):
