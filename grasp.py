@@ -1,6 +1,5 @@
 import numpy as np
 import time
-from utils import Plot
 import random
 
 def getDistance(n1, n2):
@@ -20,10 +19,7 @@ def run(n, R, Q, Th, alpha, data):
     demands[node[0]] = node[3]
 
   # Initialize variables
-  paths = {}
-  for i in range(R):
-    paths[i] = [0]
-
+  paths = {i: [0] for i in range(R)}
   availables = np.full(R, Q)
   total_distances = np.zeros(R)
 
@@ -40,6 +36,7 @@ def run(n, R, Q, Th, alpha, data):
       total_distances[i] += distances[actual_node][0]
       availables[i] = Q
       paths[i].append(0)
+      #i = (i + 1) % R
       continue
 
     c_min = min(candidates.values())
@@ -59,11 +56,10 @@ def run(n, R, Q, Th, alpha, data):
   for actual_truck in range(R):
     actual_node = paths[actual_truck][-1]
     if actual_node != 0:
-      total_distances += distances[actual_node][0] # return to depot
+      total_distances[actual_truck] += distances[actual_node][0] # return to depot
       paths[actual_truck].append(0)
 
   end = time.time()
   total_time = (end - start) * 1000
 
-  #Plot.plot(data, paths)
   return [paths, total_distances, total_time]
