@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATA_PATH = os.getenv('DATA_PATH', './data')
-OUTPUTS_PATH = os.getenv('OUTPUTS_PATH', './outputs')
+DATA_PATH = os.getenv('DATA_PATH', './data/')
+OUTPUTS_PATH = os.getenv('OUTPUTS_PATH', './outputs/')
 
 class TestFile:
   def getById(id):
@@ -31,24 +31,26 @@ class ExcelBook:
     except IndexError:
       return self.wb.add_sheet(name)
 
-  def add_sheet(self, title, paths, distances, total_time, Th, offset = 0, verbose = True):
-    sheet1 = self.get_sheet_by_name(title)
+  def add_sheet(self, index, problem_result, Th):
+    sheet1 = self.get_sheet_by_name('mtVRP' + str(index))
+    paths, distances, total_time = problem_result
     R = len(paths)
     for i in range(0, R):
       size = len(paths[i])
-      row = offset + i + 1
       for j in range(size):
-        sheet1.write(row, j, paths[i][j])
-      sheet1.write(row, size, distances[i])
-      sheet1.write(row, size + 1, 1 if distances[i] > Th else 0)
+        sheet1.write(i, j, paths[i][j])
+      sheet1.write(i, size, '{:.2f}'.format(distances[i]))
+      sheet1.write(i, size + 1, 1 if distances[i] > Th else 0)
 
-    sheet1.write(offset + R + 1, 1, sum(distances))
-    sheet1.write(offset + R + 1, 2, total_time)
-    sheet1.write(offset + R + 1, 3, 1)
+    sheet1.write(R, 0, '{:.2f}'.format(sum(distances)))
+    sheet1.write(R, 1, '{:.2f}'.format(total_time))
+    sheet1.write(R, 2, 1)
 
   def save(self):
-    print(f'{self.title} saved!')
+    if not os.path.exists(OUTPUTS_PATH):
+      os.makedirs(OUTPUTS_PATH)
     self.wb.save(OUTPUTS_PATH + self.title)
+    print(f'{self.title} saved!')
 
 class Plot:
   def plotDistances(labels, distances):

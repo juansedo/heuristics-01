@@ -1,31 +1,59 @@
 #%%
 from utils import ExcelBook, TestFile, Plot
-import sys
 
 import constructivo as Constructivo
 import grasp as GRASP
 import noise as Noise
 
-def runConstructivo():
-  paths, distances, time = Constructivo.run(n, R, Q, Th, data)
-  excel = ExcelBook(f'mtVRP_{author}_Constructivo.xls')
-  excel.add_sheet('0', paths, distances, time, Th, verbose = False)
+author = 'JSDIAZO'
 
-  Plot.plot(data, paths)
+def main():
+  builderExcel = ExcelBook(f'mtVRP_{author}_Constructivo.xls')
+  graspExcel = ExcelBook(f'mtVRP_{author}_GRASP.xls')
+  noiseExcel = ExcelBook(f'mtVRP_{author}_Noise.xls')
+
+  for fileId in range(13):
+    data = TestFile.getById(fileId)
+    n, R, Q, Th = data[0]
+    data = data[1:]
+    iterations = 20
+    alpha = 0.02
+
+    print(f'--> mtVRP{fileId}.txt')
+
+    result = runConstructivo(n, R, Q, Th, data)
+    builderExcel.add_sheet(str(fileId), result, Th)
+    #Plot.plot(data, result[0])
+
+    result = runGRASP(n, R, Q, Th, data, iterations, alpha)
+    graspExcel.add_sheet(str(fileId), result, Th)
+    #Plot.plot(data, result[0])
+
+    result = runNoise(n, R, Q, Th, data, iterations)
+    noiseExcel.add_sheet(str(fileId), result, Th)
+    #Plot.plot(data, result[0])
+
+  builderExcel.save()
+  graspExcel.save()
+  noiseExcel.save()
+
+def runConstructivo(n, R, Q, Th, data):
+  paths, distances, time = Constructivo.run(n, R, Q, Th, data)
 
   print(f'-----------------')
   print(f'CONSTRUCTIVO Summary')
   print(f'Iterations: 1, Time: {time:.2f} ms')
   print(f'Distance: {sum(distances):.2f} m')
-  excel.save()
   print(f'-----------------\n')
+  return [paths, distances, time]
 
-def runGRASP():
+def runGRASP(n, R, Q, Th, data, iterations, alpha):
   x = []
   y = []
   times = []
   result_paths = []
-  excel = ExcelBook(f'mtVRP_{author}_GRASP.xls')
+
+  best = [None, None, None]
 
   for i in range(iterations):
     paths, distances, time = GRASP.run(n, R, Q, Th, alpha, data)
@@ -33,27 +61,27 @@ def runGRASP():
     x.append(sum(distances))
     times.append(time)
     result_paths.append(paths)
-    excel.add_sheet(str(i), paths, distances, time, Th, verbose = False)
 
-  Plot.plotDistances(y, x)
-
-  min_iteration = x.index(min(x))
-  Plot.plot(data, result_paths[min_iteration])
+    if best[1] is None or sum(distances) < sum(best[1]):
+      best[0] = paths
+      best[1] = distances
+      best[2] = time
 
   print(f'-----------------')
   print(f'GRASP Summary')
   print(f'Iterations: {iterations}, alpha: {alpha}')
   print(f'Avg. distance: {sum(x)/len(x):.2f} m, Avg. time: {sum(times)/len(times):.2f} ms')
-  print(f'Lowest distance: ({min(x):.2f} m, {times[min_iteration]:.2f} ms)')
-  excel.save()
+  print(f'Lowest distance: ({min(x):.2f} m, {best[2]:.2f} ms)')
   print(f'-----------------\n')
+  return best
 
-def runNoise():
+def runNoise(n, R, Q, Th, data, iterations):
   x = []
   y = []
   times = []
   result_paths = []
-  excel = ExcelBook(f'mtVRP_{author}_Noise.xls')
+
+  best = [None, None, None]
 
   for i in range(iterations):
     paths, distances, time = Noise.run(n, R, Q, Th, data)
@@ -61,48 +89,21 @@ def runNoise():
     x.append(sum(distances))
     times.append(time)
     result_paths.append(paths)
-    excel.add_sheet(str(i), paths, distances, time, Th, verbose = False)
 
-  Plot.plotDistances(y, x)
-
-  min_iteration = x.index(min(x))
-  Plot.plot(data, result_paths[min_iteration])
+    if best[1] is None or sum(distances) < sum(best[1]):
+      best[0] = paths
+      best[1] = distances
+      best[2] = time
 
   print(f'-----------------')
   print(f'Noise Summary')
   print(f'Iterations: {iterations}, Distribution: Uniform')
   print(f'Avg. distance: {sum(x)/len(x):.2f} m, Avg. time: {sum(times)/len(times):.2f} ms')
-  print(f'Lowest distance: ({min(x):.2f} m, {times[min_iteration]:.2f} ms)')
-  excel.save()
+  print(f'Lowest distance: ({sum(best[1]):.2f} m, {best[2]:.2f} ms)')
   print(f'-----------------\n')
+  return best
 
 if __name__ == '__main__':
-  author = 'JSDIAZO'
-  file = 0
-  iterations = 1
-  alpha = 1
-
-  if len(sys.argv) == 2 and sys.argv[1] == '--default':
-    file = 12
-    iterations = 100
-    alpha = 0.02
-  elif len(sys.argv) == 4:
-    file = int(sys.argv[1])
-    iterations = int(sys.argv[2])
-    alpha = float(sys.argv[3])
-  else:
-    print(f'main.py: missing arguments, try: \'python3 main.py FILE_ID ITERATIONS ALPHA\'\n')
-    exit()
-
-  data = TestFile.getById(file)
-  n, R, Q, Th = data[0]
-  data = data[1:]
-
-  print(f'--> mtVRP{file}.txt')
-  print(f'--> Iterations: {iterations}, alpha for GRASP: {alpha}\n')
-
-  runConstructivo()
-  runGRASP()
-  runNoise()
+  main()
 
 # %%
