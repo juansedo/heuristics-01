@@ -8,11 +8,11 @@ import noise as Noise
 author = 'JSDIAZO'
 
 def main():
-  builderExcel = ExcelBook(f'mtVRP_{author}_Constructivo.xls')
-  graspExcel = ExcelBook(f'mtVRP_{author}_GRASP.xls')
-  noiseExcel = ExcelBook(f'mtVRP_{author}_Noise.xls')
+  builderExcel = ExcelBook(f'mtVRP_{author}_Constructivo.xlsx')
+  graspExcel = ExcelBook(f'mtVRP_{author}_GRASP.xlsx')
+  noiseExcel = ExcelBook(f'mtVRP_{author}_Noise.xlsx')
 
-  for fileId in range(13):
+  for fileId in range(1, 13):
     data = TestFile.getById(fileId)
     n, R, Q, Th = data[0]
     data = data[1:]
@@ -42,14 +42,12 @@ def runConstructivo(n, R, Q, Th, data):
 
   print(f'-----------------')
   print(f'CONSTRUCTIVO Summary')
-  print(f'Iterations: 1, Time: {time:.2f} ms')
-  print(f'Distance: {sum(distances):.2f} m')
+  print(f'Iterations: 1')
+  print(f'Distance: {sum(distances):.2f} m ({time:.2f} ms)')
   print(f'-----------------\n')
   return [paths, distances, time]
 
 def runGRASP(n, R, Q, Th, data, iterations, alpha):
-  x = []
-  y = []
   times = []
   result_paths = []
 
@@ -57,8 +55,6 @@ def runGRASP(n, R, Q, Th, data, iterations, alpha):
 
   for i in range(iterations):
     paths, distances, time = GRASP.run(n, R, Q, Th, alpha, data)
-    y.append(f'{i + 1} ({time:.2f} ms)')
-    x.append(sum(distances))
     times.append(time)
     result_paths.append(paths)
 
@@ -70,14 +66,11 @@ def runGRASP(n, R, Q, Th, data, iterations, alpha):
   print(f'-----------------')
   print(f'GRASP Summary')
   print(f'Iterations: {iterations}, alpha: {alpha}')
-  print(f'Avg. distance: {sum(x)/len(x):.2f} m, Avg. time: {sum(times)/len(times):.2f} ms')
-  print(f'Lowest distance: ({min(x):.2f} m, {best[2]:.2f} ms)')
+  print(f'Best distance: {sum(best[1]):.2f} m ({best[2]:.2f} ms)')
   print(f'-----------------\n')
   return best
 
 def runNoise(n, R, Q, Th, data, iterations):
-  x = []
-  y = []
   times = []
   result_paths = []
 
@@ -85,8 +78,6 @@ def runNoise(n, R, Q, Th, data, iterations):
 
   for i in range(iterations):
     paths, distances, time = Noise.run(n, R, Q, Th, data)
-    y.append(f'{i + 1} ({time:.2f} ms)')
-    x.append(sum(distances))
     times.append(time)
     result_paths.append(paths)
 
@@ -97,9 +88,8 @@ def runNoise(n, R, Q, Th, data, iterations):
 
   print(f'-----------------')
   print(f'Noise Summary')
-  print(f'Iterations: {iterations}, Distribution: Uniform')
-  print(f'Avg. distance: {sum(x)/len(x):.2f} m, Avg. time: {sum(times)/len(times):.2f} ms')
-  print(f'Lowest distance: ({sum(best[1]):.2f} m, {best[2]:.2f} ms)')
+  print(f'Iterations: {iterations}')
+  print(f'Best distance: {sum(best[1]):.2f} m ({best[2]:.2f} ms)')
   print(f'-----------------\n')
   return best
 

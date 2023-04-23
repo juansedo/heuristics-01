@@ -1,10 +1,7 @@
 import numpy as np
+import math
 import time
-
-def getDistance(n1, n2):
-  x1, y1 = n1
-  x2, y2 = n2
-  return np.sqrt((x2-x1)**2 + (y2-y1)**2)
+from utils import getDistance
 
 def getShortestPath(distances, demands, available):
   next_node = 0

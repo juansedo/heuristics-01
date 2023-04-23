@@ -2,12 +2,18 @@ from xlwt import Workbook
 import matplotlib.pyplot as plt
 import os
 import itertools
+import math
 from dotenv import load_dotenv
 
 load_dotenv()
 
 DATA_PATH = os.getenv('DATA_PATH', './data/')
 OUTPUTS_PATH = os.getenv('OUTPUTS_PATH', './outputs/')
+
+def getDistance(n1, n2):
+  x1, y1 = n1
+  x2, y2 = n2
+  return round(math.sqrt((x2-x1)**2 + (y2-y1)**2), 2)
 
 class TestFile:
   def getById(id):
