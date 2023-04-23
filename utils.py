@@ -45,11 +45,11 @@ class ExcelBook:
       size = len(paths[i])
       for j in range(size):
         sheet1.write(i, j, paths[i][j])
-      sheet1.write(i, size, '{:.2f}'.format(distances[i]))
+      sheet1.write(i, size, round(distances[i], 2))
       sheet1.write(i, size + 1, 1 if distances[i] > Th else 0)
 
-    sheet1.write(R, 0, '{:.2f}'.format(sum(distances)))
-    sheet1.write(R, 1, '{:.2f}'.format(total_time))
+    sheet1.write(R, 0, round(sum(distances), 2))
+    sheet1.write(R, 1, round(total_time, 2))
     sheet1.write(R, 2, 1)
 
   def save(self):

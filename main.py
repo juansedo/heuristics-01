@@ -8,9 +8,9 @@ import noise as Noise
 author = 'JSDIAZO'
 
 def main():
-  builderExcel = ExcelBook(f'mtVRP_{author}_Constructivo.xlsx')
-  graspExcel = ExcelBook(f'mtVRP_{author}_GRASP.xlsx')
-  noiseExcel = ExcelBook(f'mtVRP_{author}_Noise.xlsx')
+  builderExcel = ExcelBook(f'mtVRP_{author}_Constructivo.xls')
+  graspExcel = ExcelBook(f'mtVRP_{author}_GRASP.xls')
+  noiseExcel = ExcelBook(f'mtVRP_{author}_Noise.xls')
 
   for fileId in range(1, 13):
     data = TestFile.getById(fileId)
